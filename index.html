@@ -202,7 +202,8 @@
             color: #ddd;
         }
 
-        .form-group input[type="text"] {
+        .form-group input[type="text"],
+        .form-group input[type="file"] {
             width: 100%;
             padding: 10px;
             border-radius: 8px;
@@ -210,6 +211,14 @@
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
             font-size: 0.95rem;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.85rem;
+            color: #aaa;
+            position: relative;
         }
 
         .save-btn {
@@ -285,13 +294,20 @@
             </div>
             
             <div class="form-group">
-                <label>1. הדבק כאן את קישור השיר מ-Google Drive:</label>
+                <label>אפשרות 1: הדבק קישור מ-Google Drive:</label>
                 <input type="text" id="songUrl" placeholder="https://drive.google.com/file/d/...">
             </div>
 
             <div class="form-group">
-                <label>2. שם השיר שיוצג בדף (כתוב את שם השיר):</label>
+                <label>שם השיר שיוצג בדף:</label>
                 <input type="text" id="songTitle" placeholder="לדוגמה: רבי שמעון">
+            </div>
+
+            <div class="divider">--- או ---</div>
+
+            <div class="form-group">
+                <label>אפשרות 2: בחר קובץ מוזיקה מהמכשיר / מהטלפון:</label>
+                <input type="file" id="songFile" accept="audio/*" onchange="autoFillFileTitle(this)">
             </div>
 
             <button class="save-btn" onclick="addSong()"><i class="fas fa-check"></i> שמור והוסף נעימה</button>
@@ -315,24 +331,27 @@
         let currentPlayingIndex = null;
         const audio = document.getElementById('globalAudio');
 
-        // פונקציה משודרגת להמרת כל סוגי קישורי Google Drive לקישור הזרמה ישיר
         function formatDriveUrl(url) {
             if (!url) return '';
-            
-            // זיהוי ID מתוך כל מבנה קישור של Google Drive
             let fileId = '';
-            
             if (url.includes('/file/d/')) {
                 fileId = url.split('/file/d/')[1].split('/')[0].split('?')[0];
             } else if (url.includes('id=')) {
                 fileId = url.split('id=')[1].split('&')[0];
             }
-
             if (fileId) {
                 return `https://docs.google.com/uc?export=open&id=${fileId}`;
             }
-            
             return url;
+        }
+
+        // מילוי אוטומטי של שם השיר כשבוחרים קובץ מקומי
+        function autoFillFileTitle(input) {
+            if (input.files && input.files[0]) {
+                let fileName = input.files[0].name;
+                fileName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+                document.getElementById('songTitle').value = fileName;
+            }
         }
 
         function renderSongs() {
@@ -371,13 +390,13 @@
             } else {
                 currentPlayingIndex = index;
                 if (song.url) {
-                    const directUrl = formatDriveUrl(song.url);
+                    const directUrl = song.url.startsWith('blob:') ? song.url : formatDriveUrl(song.url);
                     audio.src = directUrl;
                     audio.play().catch(e => {
                         alert("לא ניתן לנגן את הקובץ. ודא שהקישור תקין ומוגדר כציבורי ב-Google Drive.");
                     });
                 } else {
-                    alert("שיר זה עדיין לא מקושר לקובץ מוזיקה. אנא עדכן אותו ב'ניהול שירים'.");
+                    alert("שיר זה עדיין לא מקושר לקובץ מוזיקה.");
                 }
             }
             renderSongs();
@@ -402,23 +421,31 @@
         function addSong() {
             const titleInput = document.getElementById('songTitle').value.trim();
             const urlInput = document.getElementById('songUrl').value.trim();
+            const fileInput = document.getElementById('songFile').files[0];
 
             if (!titleInput) {
                 alert("אנא הכנס את שם השיר שיוצג בדף");
                 return;
             }
 
-            if (!urlInput) {
-                alert("אנא הדבק קישור מ-Google Drive");
-                return;
+            if (fileInput) {
+                const fileUrl = URL.createObjectURL(fileInput);
+                songs.push({ title: titleInput, url: fileUrl });
+                saveAndRefresh();
+            } else if (urlInput) {
+                const formattedUrl = formatDriveUrl(urlInput);
+                songs.push({ title: titleInput, url: formattedUrl });
+                saveAndRefresh();
+            } else {
+                alert("אנא בחר קובץ מהמכשיר או הדבק קישור מ-Google Drive");
             }
+        }
 
-            const formattedUrl = formatDriveUrl(urlInput);
-            songs.push({ title: titleInput, url: formattedUrl });
-            
+        function saveAndRefresh() {
             localStorage.setItem('tiamo_songs', JSON.stringify(songs));
             document.getElementById('songTitle').value = '';
             document.getElementById('songUrl').value = '';
+            document.getElementById('songFile').value = '';
             closeModal();
             renderSongs();
         }
