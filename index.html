@@ -159,6 +159,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            z-index: 100;
         }
 
         .modal-content {
@@ -324,7 +325,7 @@
     <audio id="globalAudio"></audio>
 
     <script>
-        // שירי הבסיס מהדרייב עם קישורי הורדה/הזרמה ישירים
+        // שירי הבסיס מהדרייב עם קישורי הורדה ישירים
         const defaultSongs = [
             { title: "נעימה - את השמחה לא נעצור", url: "https://docs.google.com/uc?export=download&id=17BntKdR66DNAGkkX88MhyPbkwHbWgykS" },
             { title: "נעימה זה הזמן לסלוח", url: "https://docs.google.com/uc?export=download&id=1bnJF-iM2dn4UBYBJPxTjheLFvluuQ8x_" },
@@ -333,17 +334,18 @@
             { title: "מברוק עלק", url: "https://docs.google.com/uc?export=download&id=1mxe2hKTgWzav4f0g2C3I1PG2BC9nCzEV" }
         ];
 
-        // בדיקת גרסה וטעינה חובה של שירי הבסיס אם הרשימה ריקה
-        const CURRENT_VERSION = 'v4_fix_empty';
-        if (localStorage.getItem('tiamo_version') !== CURRENT_VERSION) {
-            localStorage.setItem('tiamo_songs', JSON.stringify(defaultSongs));
-            localStorage.setItem('tiamo_version', CURRENT_VERSION);
-        }
-
-        let songs = JSON.parse(localStorage.getItem('tiamo_songs'));
-        if (!songs || songs.length === 0) {
-            songs = defaultSongs;
-            localStorage.setItem('tiamo_songs', JSON.stringify(songs));
+        // טעינה בטוחה של השירים מהזיכרון או ברירת המחדל
+        let songs = defaultSongs;
+        try {
+            const saved = localStorage.getItem('tiamo_songs');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    songs = parsed;
+                }
+            }
+        } catch (e) {
+            console.error(e);
         }
 
         let currentPlayingIndex = null;
@@ -365,6 +367,7 @@
 
         function renderSongs() {
             const container = document.getElementById('songContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             songs.forEach((song, index) => {
@@ -417,11 +420,13 @@
         audio.onpause = () => renderSongs();
 
         function openModal() {
-            document.getElementById('adminModal').style.display = 'flex';
+            const modal = document.getElementById('adminModal');
+            if (modal) modal.style.display = 'flex';
         }
 
         function closeModal() {
-            document.getElementById('adminModal').style.display = 'none';
+            const modal = document.getElementById('adminModal');
+            if (modal) modal.style.display = 'none';
         }
 
         function addSong() {
@@ -467,6 +472,7 @@
 
         function renderAdminList() {
             const adminList = document.getElementById('adminSongList');
+            if (!adminList) return;
             adminList.innerHTML = '';
 
             songs.forEach((song, index) => {
@@ -480,6 +486,7 @@
             });
         }
 
+        // הפעלה ראשונית של טעינת המסך
         renderSongs();
     </script>
 </body>
