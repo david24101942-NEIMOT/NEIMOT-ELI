@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIAMO MUSIC</title>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Rubik', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url('REKA.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px 120px 15px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .header-container {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .admin-toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .admin-panel.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .admin-panel h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            opacity: 0.9;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            direction: rtl;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .file-upload-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .file-upload-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #fff;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .selected-file-name {
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: #2ecc71;
+            font-weight: 500;
+            display: none;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 12px;
+            background: #27ae60;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-add:hover {
+            background: #219150;
+        }
+
+        /* Songs Grid */
+        .songs-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .song-card {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 18px 15px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .song-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .song-card.playing {
+            border: 2px solid #2ecc71;
+            background: rgba(46, 204, 113, 0.15);
+        }
+
+        .song-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .play-btn {
+            background: #ffffff;
+            color: #2c3e50;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            background: #f8f9fa;
+        }
+
+        .song-status {
+            font-size: 0.75rem;
+            margin-top: 12px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(231, 76, 60, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            transition: background 0.2s;
+        }
+
+        .admin-mode .delete-btn {
+            display: flex;
+        }
+
+        .delete-btn:hover {
+            background: rgba(231, 76, 60, 1);
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(15px);
+            padding: 12px 20px;
+            text-align: center;
+            z-index: 10;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2.1rem; }
+            .songs-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .song-card { padding: 14px 10px; }
+            .song-title { font-size: 1rem; }
+            .play-btn { width: 100%; padding: 6px 12px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1>TIAMO MUSIC</h1>
+        <button class="admin-toggle-btn" onclick="toggleAdminPanel()">
+            <i class="fa-solid fa-gear"></i> ניהול שירים
+        </button>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <h3><i class="fa-solid fa-plus-circle"></i> הוספת נעימה חדשה</h3>
+        <div class="form-group">
+            <label>שם הנעימה / השיר:</label>
+            <input type="text" id="songTitle" placeholder="רשום את שם השיר או הנעימה">
+        </div>
+        <div class="form-group">
+            <label>בחר קובץ מוזיקה (Browse):</label>
+            <div class="file-upload-wrapper">
+                <div class="file-upload-btn">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <span id="fileBtnText">עיון... (Browse) ולחיצה לבחירת קובץ MP3</span>
+                </div>
+                <input type="file" id="songFileInput" accept="audio/*" onchange="handleFileSelect(event)">
+            </div>
+            <div class="selected-file-name" id="selectedFileName"></div>
+        </div>
+        <button class="btn-add" onclick="addSong()"><i class="fa-solid fa-check"></i> שמור והוסף נעימה</button>
+    </div>
+
+    <!-- Songs Grid -->
+    <div class="songs-grid" id="songsContainer"></div>
+
+    <audio id="mainAudioPlayer"></audio>
+
+    <footer>
+        @TIAMO MUSIC | elimizrchi ©
+    </footer>
+
+    <script>
+        const initialSongs = [
+            { id: '1', title: 'אני חי למענך', url: 'אני חי למענך.mp3' },
+            { id: '2', title: 'גואל ופוד', url: 'גואל ופוד.mp3' },
+            { id: '3', title: 'דירנה גולה', url: 'דירנה גולה.mp3' },
+            { id: '4', title: 'דחלוענאק חביבה', url: 'דחלוענאק חביבה.mp3' },
+            { id: '5', title: 'מבחוק עלקו', url: 'מבחוק עלקו.mp3' },
+            { id: '6', title: 'תעונה - אח השמחה', url: 'תעונה - אח השמחה.mp3' },
+            { id: '7', title: 'נעימה - אוזון', url: 'נעימה - אוזון.mp3' },
+            { id: '8', title: 'נעימה זו הזמן לסלוח', url: 'נעימה זו הזמן לסלוח.mp3' },
+            { id: '9', title: 'נעימה משחקי קלפים', url: 'נעימה משחקי קלפים.mp3' },
+            { id: '10', title: 'רבי שמעון', url: 'רבי שמעון.mp3' }
+        ];
+
+        let songs = [];
+        let selectedFile = null;
+        let currentPlayingId = null;
+        const audioPlayer = document.getElementById('mainAudioPlayer');
+
+        function loadSongs() {
+            const saved = localStorage.getItem('tiamo_songs_browse');
+            if (saved) {
+                songs = JSON.parse(saved);
+            } else {
+                songs = [...initialSongs];
+                saveSongsToStorage();
+            }
+            renderSongs();
+        }
+
+        function saveSongsToStorage() {
+            localStorage.setItem('tiamo_songs_browse', JSON.stringify(songs));
+        }
+
+        function renderSongs() {
+            const container = document.getElementById('songsContainer');
+            container.innerHTML = '';
+
+            songs.forEach(song => {
+                const isPlaying = song.id === currentPlayingId;
+                const card = document.createElement('div');
+                card.className = `song-card ${isPlaying ? 'playing' : ''}`;
+
+                card.innerHTML = `
+                    <button class="delete-btn" onclick="deleteSong('${song.id}')" title="מחק נעימה">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <div class="song-title" title="${song.title}">${song.title}</div>
+                    <button class="play-btn" onclick="togglePlay('${song.id}', '${encodeURI(song.url)}')">
+                        <i class="fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}"></i>
+                        <span>${isPlaying ? 'עצור' : 'נגן'}</span>
+                    </button>
+                    <div class="song-status">
+                        <i class="fa-solid ${isPlaying ? 'fa-volume-high' : 'fa-music'}"></i>
+                        <span>${isPlaying ? 'מנגן' : 'מוכן'}</span>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                const fileNameDiv = document.getElementById('selectedFileName');
+                fileNameDiv.style.display = 'block';
+                fileNameDiv.innerHTML = '<i class="fa-solid fa-file-audio"></i> נבחר הקובץ: ' + file.name;
+                
+                const titleInput = document.getElementById('songTitle');
+                if (!titleInput.value.trim()) {
+                    const cleanName = file.name.replace(/\.[^/.]+$/, "");
+                    titleInput.value = cleanName;
+                }
+            }
+        }
+
+        function togglePlay(id, url) {
+            if (currentPlayingId === id) {
+                audioPlayer.pause();
+                currentPlayingId = null;
+            } else {
+                currentPlayingId = id;
+                audioPlayer.src = url;
+                audioPlayer.play().catch(e => {
+                    alert('לא ניתן לנגן את הקובץ. ודא שקובץ השמע נמצא בתיקיית האתר או שנבחר קובץ תקין.');
+                    currentPlayingId = null;
+                    renderSongs();
+                });
+            }
+            renderSongs();
+        }
+
+        audioPlayer.onended = function() {
+            currentPlayingId = null;
+            renderSongs();
+        };
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            document.body.classList.toggle('admin-mode');
+            panel.classList.toggle('active');
+        }
+
+        function addSong() {
+            const titleInput = document.getElementById('songTitle');
+            const title = titleInput.value.trim();
+
+            if (!title) {
+                alert('נא לרשום את שם השיר או הנעימה');
+                return;
+            }
+
+            if (!selectedFile) {
+                alert('נא לבחור קובץ מוזיקה באמצעות כפתור ה-Browse');
+                return;
+            }
+
+            const audioUrl = URL.createObjectURL(selectedFile);
+
+            const newSong = {
+                id: Date.now().toString(),
+                title: title,
+                url: audioUrl
+            };
+
+            songs.push(newSong);
+            saveSongsToStorage();
+            renderSongs();
+
+            titleInput.value = '';
+            document.getElementById('songFileInput').value = '';
+            document.getElementById('selectedFileName').style.display = 'none';
+            selectedFile = null;
+
+            alert('הנעימה "' + title + '" הועלתה והורכבה בהצלחה!');
+        }
+
+        function deleteSong(id) {
+            if (confirm('האם למחוק נעימה זו?')) {
+                if (currentPlayingId === id) {
+                    audioPlayer.pause();
+                    currentPlayingId = null;
+                }
+                songs = songs.filter(s => s.id !== id);
+                saveSongsToStorage();
+                renderSongs();
+            }
+        }
+
+        loadSongs();
+    </script>
+</body>
+</html>
