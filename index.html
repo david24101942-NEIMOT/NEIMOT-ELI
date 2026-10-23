@@ -202,8 +202,7 @@
             color: #ddd;
         }
 
-        .form-group input[type="text"], 
-        .form-group input[type="file"] {
+        .form-group input[type="text"] {
             width: 100%;
             padding: 10px;
             border-radius: 8px;
@@ -211,14 +210,6 @@
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
             font-size: 0.95rem;
-        }
-
-        .divider {
-            text-align: center;
-            margin: 10px 0;
-            font-size: 0.85rem;
-            color: #aaa;
-            position: relative;
         }
 
         .save-btn {
@@ -300,7 +291,7 @@
 
             <div class="form-group">
                 <label>2. שם השיר שיוצג בדף (כתוב את שם השיר):</label>
-                <input type="text" id="songTitle" placeholder="לדוגמה: אבי חי למענך">
+                <input type="text" id="songTitle" placeholder="לדוגמה: רבי שמעון">
             </div>
 
             <button class="save-btn" onclick="addSong()"><i class="fas fa-check"></i> שמור והוסף נעימה</button>
@@ -319,31 +310,28 @@
     <audio id="globalAudio"></audio>
 
     <script>
-        const defaultSongs = [
-            { title: "אבי חי למענך", url: "" },
-            { title: "גואל ומפדה", url: "" },
-            { title: "דז'רנה גולה", url: "" },
-            { title: "דחלו ענבאק חביבה", url: "" },
-            { title: "מבחוק עלקו", url: "" },
-            { title: "תענוגה - אח השמחה", url: "" },
-            { title: "נעימה - אוזון", url: "" },
-            { title: "נעימה זו הזמן לסלוח", url: "" },
-            { title: "נעימה משחקי קלפים", url: "" },
-            { title: "רבי שמעון", url: "" }
-        ];
-
+        const defaultSongs = [];
         let songs = JSON.parse(localStorage.getItem('tiamo_songs')) || defaultSongs;
         let currentPlayingIndex = null;
         const audio = document.getElementById('globalAudio');
 
+        // פונקציה משודרגת להמרת כל סוגי קישורי Google Drive לקישור הזרמה ישיר
         function formatDriveUrl(url) {
             if (!url) return '';
-            if (url.includes('drive.google.com') && url.includes('/file/d/')) {
-                const matches = url.match(/\/file\/d\/([^\/]+)/);
-                if (matches && matches[1]) {
-                    return `https://docs.google.com/uc?export=open&id=${matches[1]}`;
-                }
+            
+            // זיהוי ID מתוך כל מבנה קישור של Google Drive
+            let fileId = '';
+            
+            if (url.includes('/file/d/')) {
+                fileId = url.split('/file/d/')[1].split('/')[0].split('?')[0];
+            } else if (url.includes('id=')) {
+                fileId = url.split('id=')[1].split('&')[0];
             }
+
+            if (fileId) {
+                return `https://docs.google.com/uc?export=open&id=${fileId}`;
+            }
+            
             return url;
         }
 
@@ -383,7 +371,8 @@
             } else {
                 currentPlayingIndex = index;
                 if (song.url) {
-                    audio.src = formatDriveUrl(song.url);
+                    const directUrl = formatDriveUrl(song.url);
+                    audio.src = directUrl;
                     audio.play().catch(e => {
                         alert("לא ניתן לנגן את הקובץ. ודא שהקישור תקין ומוגדר כציבורי ב-Google Drive.");
                     });
