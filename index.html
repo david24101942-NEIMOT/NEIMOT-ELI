@@ -32,18 +32,18 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.3);
             z-index: 0;
         }
 
-        header, .container, footer, .modal {
+        header, .grid-container, footer, .modal {
             position: relative;
             z-index: 1;
         }
 
         header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             margin-top: 10px;
         }
 
@@ -202,8 +202,7 @@
             color: #ddd;
         }
 
-        .form-group input[type="text"],
-        .form-group input[type="file"] {
+        .form-group input[type="text"] {
             width: 100%;
             padding: 10px;
             border-radius: 8px;
@@ -211,14 +210,6 @@
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
             font-size: 0.95rem;
-        }
-
-        .divider {
-            text-align: center;
-            margin: 15px 0;
-            font-size: 0.85rem;
-            color: #aaa;
-            position: relative;
         }
 
         .save-btn {
@@ -237,19 +228,6 @@
 
         .save-btn:hover {
             background: #27ae60;
-        }
-
-        .reset-btn {
-            width: 100%;
-            background: #e67e22;
-            color: white;
-            border: none;
-            padding: 8px;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            cursor: pointer;
-            margin-top: 15px;
         }
 
         .admin-song-list {
@@ -302,30 +280,21 @@
     <div class="modal" id="adminModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-plus-circle"></i> הוספת נעימה חדשה</h3>
+                <h3><i class="fas fa-plus-circle"></i> הוספת נעימה מ-Google Drive</h3>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             
             <div class="form-group">
-                <label>אפשרות 1: הדבק קישור מ-Google Drive:</label>
-                <input type="text" id="songUrl" placeholder="https://drive.google.com/file/d/...">
-            </div>
-
-            <div class="form-group">
-                <label>שם השיר שיוצג בדף:</label>
+                <label>שם השיר:</label>
                 <input type="text" id="songTitle" placeholder="לדוגמה: רבי שמעון">
             </div>
 
-            <div class="divider">--- או ---</div>
-
             <div class="form-group">
-                <label>אפשרות 2: בחר קובץ מוזיקה מהמכשיר / מהטלפון:</label>
-                <input type="file" id="songFile" accept="audio/*" onchange="autoFillFileTitle(this)">
+                <label>קישור לשיר מ-Google Drive:</label>
+                <input type="text" id="songUrl" placeholder="הדבק כאן את קישור השיתוף מהדרייב">
             </div>
 
-            <button class="save-btn" onclick="addSong()"><i class="fas fa-check"></i> שמור והוסף נעימה</button>
-
-            <button class="reset-btn" onclick="resetToDriveSongs()"><i class="fas fa-sync-alt"></i> טען מחדש את שירי הדרייב המקוריים</button>
+            <button class="save-btn" onclick="addSong()"><i class="fas fa-check"></i> הוסף לנגן</button>
 
             <div class="admin-song-list">
                 <h4 style="margin-bottom: 10px;">רשימת שירים קיימת:</h4>
@@ -341,17 +310,16 @@
     <audio id="globalAudio"></audio>
 
     <script>
-        // רשימת השירים המוכנה מה-Google Drive שלך
+        // רשימת השירים הראשונית מתוך הדרייב שלך עם המזהים המדויקים
         const defaultSongs = [
-            { title: "נעימה - את השמחה לא נעצור", url: "https://docs.google.com/uc?export=open&id=17BntKdR66DNAGkkX88MhyPbkwHbWgykS" },
-            { title: "נעימה זה הזמן לסלוח", url: "https://docs.google.com/uc?export=open&id=1bnJF-iM2dn4UBYBJPxTjheLFvluuQ8x_" },
-            { title: "נעימה משחקי קלפים", url: "https://docs.google.com/uc?export=open&id=1GrLncnlx9KitizWOV8v9DKT-r3CGsDuM" },
-            { title: "אני חי למענך", url: "https://docs.google.com/uc?export=open&id=14DhDcr4i7BY7fxCw9TTa2hc3-pr5Iu0p" },
-            { title: "מברוק עלק", url: "https://docs.google.com/uc?export=open&id=1mxe2hKTgWzav4f0g2C3I1PG2BC9nCzEV" }
+            { title: "נעימה - את השמחה לא נעצור", url: "https://docs.google.com/uc?export=download&id=17BntKdR66DNAGkkX88MhyPbkwHbWgykS" },
+            { title: "נעימה זה הזמן לסלוח", url: "https://docs.google.com/uc?export=download&id=1bnJF-iM2dn4UBYBJPxTjheLFvluuQ8x_" },
+            { title: "נעימה משחקי קלפים", url: "https://docs.google.com/uc?export=download&id=1GrLncnlx9KitizWOV8v9DKT-r3CGsDuM" },
+            { title: "אני חי למענך", url: "https://docs.google.com/uc?export=download&id=14DhDcr4i7BY7fxCw9TTa2hc3-pr5Iu0p" },
+            { title: "מברוק עלק", url: "https://docs.google.com/uc?export=download&id=1mxe2hKTgWzav4f0g2C3I1PG2BC9nCzEV" }
         ];
 
-        // מנגנון איפוס אוטומטי לגרסה V2
-        const CURRENT_VERSION = 'v2_drive_loaded';
+        const CURRENT_VERSION = 'v3_drive_direct';
         if (localStorage.getItem('tiamo_version') !== CURRENT_VERSION) {
             localStorage.setItem('tiamo_songs', JSON.stringify(defaultSongs));
             localStorage.setItem('tiamo_version', CURRENT_VERSION);
@@ -370,17 +338,9 @@
                 fileId = url.split('id=')[1].split('&')[0];
             }
             if (fileId) {
-                return `https://docs.google.com/uc?export=open&id=${fileId}`;
+                return `https://docs.google.com/uc?export=download&id=${fileId}`;
             }
             return url;
-        }
-
-        function autoFillFileTitle(input) {
-            if (input.files && input.files[0]) {
-                let fileName = input.files[0].name;
-                fileName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
-                document.getElementById('songTitle').value = fileName;
-            }
         }
 
         function renderSongs() {
@@ -393,13 +353,13 @@
                 
                 const isPlaying = currentPlayingIndex === index && !audio.paused;
 
-                card.innerHTML = `
+                    card.innerHTML = `
                     <div class="song-title">${song.title}</div>
                     <button class="play-btn" onclick="togglePlay(${index})">
                         <i class="fas ${isPlaying ? 'fa-pause' : 'fa-play'}"></i>
                         <span>${isPlaying ? 'עצור' : 'נגן'}</span>
                     </button>
-                    <div class="artist-tag"><i class="fas fa-music"></i> מוכן</div>
+                    <div class="artist-tag"><i class="fas fa-cloud"></i> ענן (Drive)</div>
                 `;
                 container.appendChild(card);
             });
@@ -408,7 +368,7 @@
         }
 
         function togglePlay(index) {
-            const song = songs[index];
+            const song = songs.[index] || songs[index];
 
             if (currentPlayingIndex === index) {
                 if (audio.paused) {
@@ -419,13 +379,10 @@
             } else {
                 currentPlayingIndex = index;
                 if (song.url) {
-                    const directUrl = song.url.startsWith('blob:') ? song.url : formatDriveUrl(song.url);
-                    audio.src = directUrl;
+                    audio.src = song.url;
                     audio.play().catch(e => {
-                        alert("לא ניתן לנגן את הקובץ. ודא שהקובץ מוגדר כציבורי ב-Google Drive.");
+                        alert("לא ניתן לנגן. ודא שהקובץ בדרייב מוגדר כציבורי ('כל מי שיש לו את הקישור').");
                     });
-                } else {
-                    alert("שיר זה עדיין לא מקושר לקובץ מוזיקה.");
                 }
             }
             renderSongs();
@@ -450,37 +407,25 @@
         function addSong() {
             const titleInput = document.getElementById('songTitle').value.trim();
             const urlInput = document.getElementById('songUrl').value.trim();
-            const fileInput = document.getElementById('songFile').files[0];
 
-            if (!titleInput) {
-                alert("אנא הכנס את שם השיר שיוצג בדף");
+            if (!titleInput || !urlInput) {
+                alert("אנא הכנס גם את שם השיר וגם את הקישור מ-Google Drive");
                 return;
             }
 
-            if (fileInput) {
-                const fileUrl = URL.createObjectURL(fileInput);
-                songs.push({ title: titleInput, url: fileUrl });
-                saveAndRefresh();
-            } else if (urlInput) {
-                const formattedUrl = formatDriveUrl(urlInput);
-                songs.push({ title: titleInput, url: formattedUrl });
-                saveAndRefresh();
-            } else {
-                alert("אנא בחר קובץ מהמכשיר או הדבק קישור מ-Google Drive");
-            }
-        }
-
-        function saveAndRefresh() {
+            const formattedUrl = formatDriveUrl(urlInput);
+            songs.push({ title: titleInput, url: formattedUrl });
+            
             localStorage.setItem('tiamo_songs', JSON.stringify(songs));
+            
             document.getElementById('songTitle').value = '';
             document.getElementById('songUrl').value = '';
-            document.getElementById('songFile').value = '';
             closeModal();
             renderSongs();
         }
 
         function deleteSong(index) {
-            if (confirm("האם למחוק נעימה זו?")) {
+            if (confirm("האם למחוק נעימה זו מהרשימה?")) {
                 songs.splice(index, 1);
                 if (currentPlayingIndex === index) {
                     audio.pause();
@@ -488,15 +433,6 @@
                 }
                 localStorage.setItem('tiamo_songs', JSON.stringify(songs));
                 renderSongs();
-            }
-        }
-
-        function resetToDriveSongs() {
-            if (confirm("האם לרענן את הרשימה ולטעון את כל השירים המקוריים מה-Drive?")) {
-                songs = defaultSongs;
-                localStorage.setItem('tiamo_songs', JSON.stringify(songs));
-                renderSongs();
-                closeModal();
             }
         }
 
