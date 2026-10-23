@@ -239,6 +239,19 @@
             background: #27ae60;
         }
 
+        .reset-btn {
+            width: 100%;
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
         .admin-song-list {
             margin-top: 25px;
             border-top: 1px solid rgba(255,255,255,0.1);
@@ -312,6 +325,8 @@
 
             <button class="save-btn" onclick="addSong()"><i class="fas fa-check"></i> שמור והוסף נעימה</button>
 
+            <button class="reset-btn" onclick="resetToDriveSongs()"><i class="fas fa-sync-alt"></i> טען מחדש את שירי הדרייב המקוריים</button>
+
             <div class="admin-song-list">
                 <h4 style="margin-bottom: 10px;">רשימת שירים קיימת:</h4>
                 <div id="adminSongList"></div>
@@ -326,7 +341,7 @@
     <audio id="globalAudio"></audio>
 
     <script>
-        // רשימת השירים הראשונית מתוך הדרייב שלך
+        // רשימת השירים המוכנה מה-Google Drive שלך
         const defaultSongs = [
             { title: "נעימה - את השמחה לא נעצור", url: "https://docs.google.com/uc?export=open&id=17BntKdR66DNAGkkX88MhyPbkwHbWgykS" },
             { title: "נעימה זה הזמן לסלוח", url: "https://docs.google.com/uc?export=open&id=1bnJF-iM2dn4UBYBJPxTjheLFvluuQ8x_" },
@@ -335,10 +350,14 @@
             { title: "מברוק עלק", url: "https://docs.google.com/uc?export=open&id=1mxe2hKTgWzav4f0g2C3I1PG2BC9nCzEV" }
         ];
 
-        let savedSongs = JSON.parse(localStorage.getItem('tiamo_songs'));
-        // אם אין עדיין שירים שמורים בדפדפן, נטען את רשימת הבסיס מהדרייב
-        let songs = (savedSongs && savedSongs.length > 0) ? savedSongs : defaultSongs;
-        
+        // מנגנון איפוס אוטומטי לגרסה V2
+        const CURRENT_VERSION = 'v2_drive_loaded';
+        if (localStorage.getItem('tiamo_version') !== CURRENT_VERSION) {
+            localStorage.setItem('tiamo_songs', JSON.stringify(defaultSongs));
+            localStorage.setItem('tiamo_version', CURRENT_VERSION);
+        }
+
+        let songs = JSON.parse(localStorage.getItem('tiamo_songs')) || defaultSongs;
         let currentPlayingIndex = null;
         const audio = document.getElementById('globalAudio');
 
@@ -403,7 +422,7 @@
                     const directUrl = song.url.startsWith('blob:') ? song.url : formatDriveUrl(song.url);
                     audio.src = directUrl;
                     audio.play().catch(e => {
-                        alert("לא ניתן לנגן את הקובץ. ודא שהקישור תקין ומוגדר כציבורי ב-Google Drive.");
+                        alert("לא ניתן לנגן את הקובץ. ודא שהקובץ מוגדר כציבורי ב-Google Drive.");
                     });
                 } else {
                     alert("שיר זה עדיין לא מקושר לקובץ מוזיקה.");
@@ -469,6 +488,15 @@
                 }
                 localStorage.setItem('tiamo_songs', JSON.stringify(songs));
                 renderSongs();
+            }
+        }
+
+        function resetToDriveSongs() {
+            if (confirm("האם לרענן את הרשימה ולטעון את כל השירים המקוריים מה-Drive?")) {
+                songs = defaultSongs;
+                localStorage.setItem('tiamo_songs', JSON.stringify(songs));
+                renderSongs();
+                closeModal();
             }
         }
 
