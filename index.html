@@ -294,20 +294,20 @@
             </div>
             
             <div class="form-group">
-                <label>שם הנעימה / השיר:</label>
-                <input type="text" id="songTitle" placeholder="הכנס שם...">
+                <label>אפשרות 1: הדבק קישור מ-Google Drive (שם השיר יתמלא אוטומטית אם יתזוהה):</label>
+                <input type="text" id="songUrl" placeholder="הדבק קישור כאן..." oninput="autoFillTitle(this.value)">
             </div>
 
             <div class="form-group">
-                <label>אפשרות 1: הדבק קישור מ-Google Drive / ענן:</label>
-                <input type="text" id="songUrl" placeholder="https://docs.google.com/uc?export=open&id=FILE_ID">
+                <label>שם הנעימה / השיר (ניתן לערוך ידנית):</label>
+                <input type="text" id="songTitle" placeholder="שם השיר...">
             </div>
 
             <div class="divider">--- או ---</div>
 
             <div class="form-group">
                 <label>אפשרות 2: בחר קובץ מוזיקה מהמכשיר:</label>
-                <input type="file" id="songFile" accept="audio/*">
+                <input type="file" id="songFile" accept="audio/*" onchange="autoFillFileTitle(this)">
             </div>
 
             <button class="save-btn" onclick="addSong()"><i class="fas fa-check"></i> שמור והוסף נעימה</button>
@@ -326,7 +326,6 @@
     <audio id="globalAudio"></audio>
 
     <script>
-        // ברירת מחדל של שירים במידה והזיכרון ריק
         const defaultSongs = [
             { title: "אבי חי למענך", url: "" },
             { title: "גואל ומפדה", url: "" },
@@ -344,7 +343,6 @@
         let currentPlayingIndex = null;
         const audio = document.getElementById('globalAudio');
 
-        // פונקציית עזר להמרת קישורי Google Drive רגילים לקישור נגני ישיר
         function formatDriveUrl(url) {
             if (!url) return '';
             if (url.includes('drive.google.com') && url.includes('/file/d/')) {
@@ -354,6 +352,25 @@
                 }
             }
             return url;
+        }
+
+        // פונקציה שעוזרת למלא את שם השיר אוטומטית בעת בחירת קובץ מקומי
+        function autoFillFileTitle(input) {
+            if (input.files && input.files[0]) {
+                let fileName = input.files[0].name;
+                // מוריד את הסיומת .mp3 וכדומה
+                fileName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+                document.getElementById('songTitle').value = fileName;
+            }
+        }
+
+        // פונקציה שמזהה אם יש טקסט בקישור (אפשר להרחיב לפי הצורך)
+        function autoFillTitle(url) {
+            // אם השם ריק, אפשר לתת ברירת מחדל או להשאיר פתוח להקלדה מהירה
+            const titleInput = document.getElementById('songTitle');
+            if (!titleInput.value) {
+                titleInput.value = "נעימה מ-Drive";
+            }
         }
 
         function renderSongs() {
@@ -478,7 +495,6 @@
             });
         }
 
-        // טעינה ראשונית
         renderSongs();
     </script>
 </body>
