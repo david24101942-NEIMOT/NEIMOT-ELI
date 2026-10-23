@@ -325,16 +325,15 @@
     <audio id="globalAudio"></audio>
 
     <script>
-        // שירי הבסיס מהדרייב עם קישורי הורדה ישירים
+        // שירי הבסיס מהדרייב עם פורמט פתיחה ישיר שמתאים לדפדפנים
         const defaultSongs = [
-            { title: "נעימה - את השמחה לא נעצור", url: "https://docs.google.com/uc?export=download&id=17BntKdR66DNAGkkX88MhyPbkwHbWgykS" },
-            { title: "נעימה זה הזמן לסלוח", url: "https://docs.google.com/uc?export=download&id=1bnJF-iM2dn4UBYBJPxTjheLFvluuQ8x_" },
-            { title: "נעימה משחקי קלפים", url: "https://docs.google.com/uc?export=download&id=1GrLncnlx9KitizWOV8v9DKT-r3CGsDuM" },
-            { title: "אני חי למענך", url: "https://docs.google.com/uc?export=download&id=14DhDcr4i7BY7fxCw9TTa2hc3-pr5Iu0p" },
-            { title: "מברוק עלק", url: "https://docs.google.com/uc?export=download&id=1mxe2hKTgWzav4f0g2C3I1PG2BC9nCzEV" }
+            { title: "נעימה - את השמחה לא נעצור", url: "https://docs.google.com/uc?export=open&id=17BntKdR66DNAGkkX88MhyPbkwHbWgykS" },
+            { title: "נעימה זה הזמן לסלוח", url: "https://docs.google.com/uc?export=open&id=1bnJF-iM2dn4UBYBJPxTjheLFvluuQ8x_" },
+            { title: "נעימה משחקי קלפים", url: "https://docs.google.com/uc?export=open&id=1GrLncnlx9KitizWOV8v9DKT-r3CGsDuM" },
+            { title: "אני חי למענך", url: "https://docs.google.com/uc?export=open&id=14DhDcr4i7BY7fxCw9TTa2hc3-pr5Iu0p" },
+            { title: "מברוק עלק", url: "https://docs.google.com/uc?export=open&id=1mxe2hKTgWzav4f0g2C3I1PG2BC9nCzEV" }
         ];
 
-        // טעינה בטוחה של השירים מהזיכרון או ברירת המחדל
         let songs = defaultSongs;
         try {
             const saved = localStorage.getItem('tiamo_songs');
@@ -360,7 +359,7 @@
                 fileId = url.split('id=')[1].split('&')[0];
             }
             if (fileId) {
-                return `https://docs.google.com/uc?export=download&id=${fileId}`;
+                return `https://docs.google.com/uc?export=open&id=${fileId}`;
             }
             return url;
         }
@@ -486,7 +485,6 @@
             });
         }
 
-        // הפעלה ראשונית של טעינת המסך
         renderSongs();
     </script>
 </body>
