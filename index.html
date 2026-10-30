@@ -6,6 +6,10 @@
   <title>TIAMO MUSIC</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
   <style>
     body {
       min-height: 100vh;
@@ -19,7 +23,7 @@
       position: relative;
       font-family: Arial, sans-serif;
     }
- 
+  
     body::before {
       content: '';
       position: absolute;
@@ -27,18 +31,18 @@
       background: rgba(0, 0, 0, 0.45);
       z-index: 0;
     }
- 
+  
     header, .grid-container, footer, .modal {
       position: relative;
       z-index: 1;
     }
- 
+  
     header {
       text-align: center;
       margin-bottom: 30px;
       margin-top: 10px;
     }
- 
+  
     h1 {
       font-size: 2.8rem;
       font-weight: 700;
@@ -46,7 +50,7 @@
       text-shadow: 0 4px 15px rgba(0,0,0,0.5);
       margin-bottom: 12px;
     }
- 
+  
     .admin-btn {
       background: rgba(255, 255, 255, 0.25);
       backdrop-filter: blur(10px);
@@ -59,12 +63,7 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
- 
-    .admin-btn:hover {
-      background: rgba(255, 255, 255, 0.4);
-      transform: translateY(-2px);
-    }
- 
+  
     .grid-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -72,7 +71,7 @@
       width: 100%;
       max-width: 1000px;
     }
- 
+  
     .card {
       background: rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(12px);
@@ -88,17 +87,12 @@
       align-items: center;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
- 
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
-    }
- 
+  
     .card.active {
       border-color: #2ecc71;
       box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
     }
- 
+  
     .song-title {
       font-size: 1.15rem;
       font-weight: 500;
@@ -106,7 +100,7 @@
       text-shadow: 0 2px 5px rgba(0,0,0,0.4);
       word-break: break-word;
     }
- 
+  
     .play-btn {
       background: #ffffff;
       color: #2c3e50;
@@ -124,18 +118,12 @@
       width: 90%;
       justify-content: center;
     }
- 
-    .play-btn:hover {
-      background: #f1f2f6;
-      transform: scale(1.05);
-    }
- 
+  
     .card.active .play-btn {
       background: #2ecc71;
       color: #fff;
     }
-
-    /* Modal / Admin Panel */
+  
     .modal {
       display: none;
       position: fixed;
@@ -147,7 +135,7 @@
       padding: 20px;
       z-index: 100;
     }
- 
+  
     .modal-content {
       background: rgba(30, 30, 30, 0.95);
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -159,7 +147,7 @@
       max-height: 90vh;
       overflow-y: auto;
     }
- 
+  
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -168,7 +156,7 @@
       border-bottom: 1px solid rgba(255,255,255,0.1);
       padding-bottom: 10px;
     }
- 
+  
     .close-btn {
       background: none;
       border: none;
@@ -176,19 +164,15 @@
       font-size: 1.5rem;
       cursor: pointer;
     }
- 
-    .form-group {
+  
+    .form-section {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 12px;
       margin-bottom: 15px;
-      text-align: right;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
- 
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 0.9rem;
-      color: #ddd;
-    }
- 
+  
     .form-group input[type="text"] {
       width: 100%;
       padding: 10px;
@@ -199,7 +183,7 @@
       font-size: 0.95rem;
       box-sizing: border-box;
     }
- 
+  
     .save-btn {
       width: 100%;
       background: #2ecc71;
@@ -211,26 +195,29 @@
       font-size: 1rem;
       cursor: pointer;
       margin-top: 10px;
-      transition: background 0.3s;
     }
- 
-    .save-btn:hover { background: #27ae60; }
-
+  
+    .admin-song-list {
+      margin-top: 25px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 15px;
+    }
+  
     .admin-song-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255,255,255,0.05);
-      padding: 10px 15px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px 12px;
       border-radius: 8px;
-      margin-top: 10px;
+      margin-bottom: 8px;
     }
-
+  
     .delete-btn {
       background: #e74c3c;
       color: white;
       border: none;
-      padding: 5px 12px;
+      padding: 5px 10px;
       border-radius: 6px;
       cursor: pointer;
     }
@@ -243,53 +230,64 @@
     <button class="admin-btn" onclick="openAdmin()"><i class="fas fa-cog"></i> ניהול שירים</button>
   </header>
 
-  <div class="grid-container" id="songsGrid">
-    <!-- השירים יופיעו כאן אוטומטית -->
-  </div>
+  <div class="grid-container" id="songsContainer"></div>
 
-  <!-- חלון ניהול -->
+  <!-- Modal Admin Panel -->
   <div class="modal" id="adminModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>הוספת שיר מ-GitHub</h3>
+        <h3>ניהול שירים</h3>
         <button class="close-btn" onclick="closeAdmin()">&times;</button>
       </div>
-      
-      <div class="form-group">
-        <label>שם הקובץ שהועלה ל-GitHub (למשל: <code>גואל יבוא.mp3</code> או <code>shir1.mp3</code>):</label>
-        <input type="text" id="fileNameInput" placeholder="הכנס שם קובץ...">
-      </div>
-      
-      <button class="save-btn" onclick="addSongFromFilename()">הוסף שיר לאתר</button>
 
-      <hr style="margin: 20px 0; border-color: rgba(255,255,255,0.1);">
-      <h4>שירים קיימים:</h4>
-      <div id="adminSongsList"></div>
+      <div class="form-section">
+        <h4>הוספת שיר אוטומטית בענן</h4>
+        <div class="form-group">
+          <input type="text" id="songUrlInput" placeholder="הדבק כאן את הקישור מ-GitHub...">
+        </div>
+        <button class="save-btn" onclick="addSongAutomatic()">הוסף שיר</button>
+      </div>
+
+      <div class="admin-song-list">
+        <h4>שירים קיימים במערכת</h4>
+        <div id="adminSongList"></div>
+      </div>
     </div>
   </div>
 
   <audio id="audioPlayer"></audio>
 
   <script>
-    // הגדרת בסיס הקישור ל-GitHub שלך
-    const GITHUB_BASE_URL = "https://raw.githubusercontent.com/david24101942-NEIMOT/NEIMOT-ELI/main/";
+    const firebaseConfig = {
+      apiKey: "AIzaSyBlApQsdFF5iIrcswhtn_jSATvwYUJiz4U",
+      authDomain: "neimot-eli.firebaseapp.com",
+      projectId: "neimot-eli",
+      storageBucket: "neimot-eli.appspot.com",
+      messagingSenderId: "1098881478531",
+      appId: "1:1098881478531:web:e91c6acsb1872d56ea78b6"
+    };
 
-    let songs = JSON.parse(localStorage.getItem('tiamo_songs')) || [
-      { name: 'גואל יבוא', url: GITHUB_BASE_URL + encodeURIComponent('גואל יבוא.mp3') },
-      { name: 'נעימה ארמנית', url: GITHUB_BASE_URL + encodeURIComponent('נעימה ארמנית.mp3') },
-      { name: 'נעימה זה הזמן לסלוח', url: GITHUB_BASE_URL + encodeURIComponent('נעימה זה הזמן לסלוח.mp3') },
-      { name: 'נעימה משחקי קלפים', url: GITHUB_BASE_URL + encodeURIComponent('נעימה משחקי קלפים.mp3') }
-    ];
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
+    let songs = [];
     let currentAudio = document.getElementById('audioPlayer');
-    let playingIndex = null;
+    let currentPlayingIndex = null;
+
+    db.collection("songs").orderBy("createdAt", "asc").onSnapshot((snapshot) => {
+      songs = [];
+      snapshot.forEach((doc) => {
+        songs.push({ id: doc.id, ...doc.data() });
+      });
+      renderSongs();
+      renderAdminList();
+    });
 
     function renderSongs() {
-      const grid = document.getElementById('songsGrid');
-      grid.innerHTML = '';
-
+      const container = document.getElementById('songsContainer');
+      container.innerHTML = '';
       songs.forEach((song, index) => {
-        const isPlaying = playingIndex === index;
+        const isPlaying = currentPlayingIndex === index;
         const card = document.createElement('div');
         card.className = `card ${isPlaying ? 'active' : ''}`;
         card.innerHTML = `
@@ -299,23 +297,30 @@
             <span>${isPlaying ? 'עצור' : 'נגן'}</span>
           </button>
         `;
-        grid.appendChild(card);
+        container.appendChild(card);
       });
-
-      localStorage.setItem('tiamo_songs', JSON.stringify(songs));
     }
 
     function togglePlay(index) {
-      if (playingIndex === index) {
-        currentAudio.pause();
-        playingIndex = null;
+      if (currentPlayingIndex === index) {
+        if (currentAudio.paused) {
+          currentAudio.play();
+        } else {
+          currentAudio.pause();
+          currentPlayingIndex = null;
+        }
       } else {
-        playingIndex = index;
         currentAudio.src = songs[index].url;
         currentAudio.play();
+        currentPlayingIndex = index;
       }
       renderSongs();
     }
+
+    currentAudio.addEventListener('ended', () => {
+      currentPlayingIndex = null;
+      renderSongs();
+    });
 
     function openAdmin() {
       document.getElementById('adminModal').style.display = 'flex';
@@ -326,13 +331,48 @@
       document.getElementById('adminModal').style.display = 'none';
     }
 
-    function addSongFromFilename() {
-      const input = document.getElementById('fileNameInput');
-      let rawName = input.value.trim();
-
-      if (!rawName) {
-        alert('אנא הכנס שם קובץ');
+    async function addSongAutomatic() {
+      let inputUrl = document.getElementById('songUrlInput').value.trim();
+      if (!inputUrl) {
+        alert('אנא הדבק קישור');
         return;
       }
 
-      // חילוץ שם השיר הנ
+      let rawUrl = inputUrl
+        .replace('github.com', 'raw.githubusercontent.com')
+        .replace('/blob/', '/');
+
+      let parts = rawUrl.split('/');
+      let encodedFileName = parts[parts.length - 1];
+      let decodedFileName = decodeURIComponent(encodedFileName);
+      let cleanSongName = decodedFileName.replace(/\.mp3$/i, '');
+
+      await db.collection("songs").add({
+        name: cleanSongName,
+        url: rawUrl,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      document.getElementById('songUrlInput').value = '';
+      alert(`השיר "${cleanSongName}" נוסף בהצלחה ויתעדכן מיידית בכל המכשירים!`);
+    }
+
+    async function deleteSong(id) {
+      await db.collection("songs").doc(id).delete();
+    }
+
+    function renderAdminList() {
+      const list = document.getElementById('adminSongList');
+      list.innerHTML = '';
+      songs.forEach((song) => {
+        list.innerHTML += `
+          <div class="admin-song-item">
+            <span><b>${song.name}</b></span>
+            <button class="delete-btn" onclick="deleteSong('${song.id}')">מחק</button>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
