@@ -9,6 +9,7 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <style>
     body {
@@ -48,7 +49,15 @@
       font-weight: 700;
       letter-spacing: 2px;
       text-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #e0e0e0;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      margin-bottom: 15px;
+      line-height: 1.5;
     }
   
     .admin-btn {
@@ -66,7 +75,7 @@
   
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 20px;
       width: 100%;
       max-width: 1000px;
@@ -100,28 +109,39 @@
       text-shadow: 0 2px 5px rgba(0,0,0,0.4);
       word-break: break-word;
     }
+
+    /* עיצוב אזור הלחצנים בכרטיס השיר */
+    .song-buttons {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
+    }
   
-    .play-btn {
-      background: #ffffff;
-      color: #2c3e50;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
+    .action-btn {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 5px;
+      border-radius: 20px;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      width: 90%;
       justify-content: center;
+      gap: 4px;
     }
-  
-    .card.active .play-btn {
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .card.active .action-btn.play-action {
       background: #2ecc71;
-      color: #fff;
+      border-color: #2ecc71;
     }
   
     .modal {
@@ -173,7 +193,11 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
   
-    .form-group input[type="text"] {
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group input {
       width: 100%;
       padding: 10px;
       border-radius: 8px;
@@ -195,6 +219,16 @@
       font-size: 1rem;
       cursor: pointer;
       margin-top: 10px;
+    }
+
+    .logout-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
     }
   
     .admin-song-list {
@@ -227,152 +261,17 @@
 
   <header>
     <h1>TIAMO MUSIC</h1>
-    <button class="admin-btn" onclick="openAdmin()"><i class="fas fa-cog"></i> ניהול שירים</button>
+    <div class="subtitle">
+      נעימות אלה נוצרו ע"י AI, הזכויות ללחנים שמורות ליוצרים המקוריים!<br>
+      ניהול ועריכה: אלי מזרחי
+    </div>
+    <button class="admin-btn" onclick="openAdminModal()"><i class="fas fa-cog"></i> ניהול שירים</button>
   </header>
 
   <div class="grid-container" id="songsContainer"></div>
 
-  <!-- Modal Admin Panel -->
+  <!-- Modal Login / Admin Panel -->
   <div class="modal" id="adminModal">
     <div class="modal-content">
-      <div class="modal-header">
-        <h3>ניהול שירים</h3>
-        <button class="close-btn" onclick="closeAdmin()">&times;</button>
-      </div>
-
-      <div class="form-section">
-        <h4>הוספת שיר אוטומטית בענן</h4>
-        <div class="form-group">
-          <input type="text" id="songUrlInput" placeholder="הדבק כאן את הקישור מ-GitHub...">
-        </div>
-        <button class="save-btn" onclick="addSongAutomatic()">הוסף שיר</button>
-      </div>
-
-      <div class="admin-song-list">
-        <h4>שירים קיימים במערכת</h4>
-        <div id="adminSongList"></div>
-      </div>
-    </div>
-  </div>
-
-  <audio id="audioPlayer"></audio>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBlApQsdFF5iIrcswhtn_jSATvwYUJiz4U",
-      authDomain: "neimot-eli.firebaseapp.com",
-      projectId: "neimot-eli",
-      storageBucket: "neimot-eli.appspot.com",
-      messagingSenderId: "1098881478531",
-      appId: "1:1098881478531:web:e91c6acsb1872d56ea78b6"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    let songs = [];
-    let currentAudio = document.getElementById('audioPlayer');
-    let currentPlayingIndex = null;
-
-    db.collection("songs").orderBy("createdAt", "asc").onSnapshot((snapshot) => {
-      songs = [];
-      snapshot.forEach((doc) => {
-        songs.push({ id: doc.id, ...doc.data() });
-      });
-      renderSongs();
-      renderAdminList();
-    });
-
-    function renderSongs() {
-      const container = document.getElementById('songsContainer');
-      container.innerHTML = '';
-      songs.forEach((song, index) => {
-        const isPlaying = currentPlayingIndex === index;
-        const card = document.createElement('div');
-        card.className = `card ${isPlaying ? 'active' : ''}`;
-        card.innerHTML = `
-          <div class="song-title">${song.name}</div>
-          <button class="play-btn" onclick="togglePlay(${index})">
-            <i class="fas ${isPlaying ? 'fa-pause' : 'fa-play'}"></i>
-            <span>${isPlaying ? 'עצור' : 'נגן'}</span>
-          </button>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function togglePlay(index) {
-      if (currentPlayingIndex === index) {
-        if (currentAudio.paused) {
-          currentAudio.play();
-        } else {
-          currentAudio.pause();
-          currentPlayingIndex = null;
-        }
-      } else {
-        currentAudio.src = songs[index].url;
-        currentAudio.play();
-        currentPlayingIndex = index;
-      }
-      renderSongs();
-    }
-
-    currentAudio.addEventListener('ended', () => {
-      currentPlayingIndex = null;
-      renderSongs();
-    });
-
-    function openAdmin() {
-      document.getElementById('adminModal').style.display = 'flex';
-      renderAdminList();
-    }
-
-    function closeAdmin() {
-      document.getElementById('adminModal').style.display = 'none';
-    }
-
-    async function addSongAutomatic() {
-      let inputUrl = document.getElementById('songUrlInput').value.trim();
-      if (!inputUrl) {
-        alert('אנא הדבק קישור');
-        return;
-      }
-
-      let rawUrl = inputUrl
-        .replace('github.com', 'raw.githubusercontent.com')
-        .replace('/blob/', '/');
-
-      let parts = rawUrl.split('/');
-      let encodedFileName = parts[parts.length - 1];
-      let decodedFileName = decodeURIComponent(encodedFileName);
-      let cleanSongName = decodedFileName.replace(/\.mp3$/i, '');
-
-      await db.collection("songs").add({
-        name: cleanSongName,
-        url: rawUrl,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      document.getElementById('songUrlInput').value = '';
-      alert(`השיר "${cleanSongName}" נוסף בהצלחה ויתעדכן מיידית בכל המכשירים!`);
-    }
-
-    async function deleteSong(id) {
-      await db.collection("songs").doc(id).delete();
-    }
-
-    function renderAdminList() {
-      const list = document.getElementById('adminSongList');
-      list.innerHTML = '';
-      songs.forEach((song) => {
-        list.innerHTML += `
-          <div class="admin-song-item">
-            <span><b>${song.name}</b></span>
-            <button class="delete-btn" onclick="deleteSong('${song.id}')">מחק</button>
-          </div>
-        `;
-      });
-    }
-  </script>
-</body>
-</html>
+      
+      <!-- חלון התחברות -->
