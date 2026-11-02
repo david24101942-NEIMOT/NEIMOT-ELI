@@ -9,7 +9,6 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <style>
     body {
@@ -40,8 +39,8 @@
   
     header {
       text-align: center;
-      margin-bottom: 30px;
-      margin-top: 10px;
+      margin-bottom: 35px;
+      margin-top: 15px;
     }
   
     h1 {
@@ -49,15 +48,16 @@
       font-weight: 700;
       letter-spacing: 2px;
       text-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
-    .subtitle {
-      font-size: 1rem;
-      color: #e0e0e0;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
-      margin-bottom: 15px;
-      line-height: 1.5;
+    .sub-credits {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.85);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      margin-bottom: 20px;
+      font-weight: 400;
+      letter-spacing: 0.5px;
     }
   
     .admin-btn {
@@ -75,7 +75,7 @@
   
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 20px;
       width: 100%;
       max-width: 1000px;
@@ -95,6 +95,7 @@
       justify-content: space-between;
       align-items: center;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
     }
   
     .card.active {
@@ -102,27 +103,83 @@
       box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
     }
   
-    .song-title {
-      font-size: 1.15rem;
-      font-weight: 500;
-      margin-bottom: 15px;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.4);
-      word-break: break-word;
+    .song-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 12px;
     }
 
-    .song-buttons {
+    .song-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      word-break: break-word;
+      text-align: right;
+      flex-grow: 1;
+    }
+
+    /* עיצוב לחצני החיצים להזזה אישית */
+    .move-btns {
       display: flex;
-      gap: 6px;
+      gap: 4px;
+    }
+
+    .move-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .move-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .seek-slider {
+      width: 90%;
+      margin: 10px 0;
+      accent-color: #2ecc71;
+      cursor: pointer;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.3);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .seek-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .controls-group {
+      display: flex;
+      gap: 8px;
       width: 100%;
       justify-content: center;
+      margin-top: 8px;
     }
   
     .action-btn {
-      flex: 1;
       background: rgba(255, 255, 255, 0.2);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 8px 5px;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 8px 14px;
       border-radius: 20px;
       font-weight: 600;
       font-size: 0.85rem;
@@ -130,9 +187,5 @@
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-
-    .action-btn:hover {
-      background: rgba(255,
+      gap: 5px;
+      box-shadow: 0 4px 10px
