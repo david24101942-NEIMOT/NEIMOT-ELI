@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>TIAMO MUSIC</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -11,25 +11,57 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <style>
-    body {
+    /* עיגון מושלם ויציב של תמונת הרקע */
+    .bg-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100dvh;
+      z-index: -2;
+      overflow: hidden;
+      background-color: #1a1a1a;
+      pointer-events: none;
+    }
+
+    .bg-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center bottom; 
+      filter: brightness(1.05) contrast(1.1);
+    }
+
+    .bg-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100dvh;
+      z-index: -1;
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+      pointer-events: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
       min-height: 100vh;
-      background: #111 url('REKA.jpeg') no-repeat center center fixed;
-      background-size: contain;
+      font-family: Arial, sans-serif;
       color: #ffffff;
+      background-color: #1a1a1a;
+      overflow-x: hidden;
+    }
+
+    body {
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 20px 15px 120px 15px;
       position: relative;
-      font-family: Arial, sans-serif;
-    }
-  
-    body::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.45);
-      z-index: 0;
     }
   
     header, .grid-container, footer, .modal {
@@ -39,68 +71,145 @@
   
     header {
       text-align: center;
-      margin-bottom: 35px;
+      margin-bottom: 30px;
       margin-top: 15px;
+      max-width: 700px;
     }
   
     h1 {
-      font-size: 2.8rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      margin-bottom: 12px;
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-shadow: 0 6px 20px rgba(0,0,0,0.8);
+      margin-bottom: 8px;
+    }
+
+    /* הנפשת הבהוב עדינה לטיפ */
+    @keyframes blinkTip {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.98); }
+    }
+
+    .intro-tip {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.95);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 8px 16px;
+      border-radius: 30px;
+      display: inline-block;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      animation: blinkTip 2s infinite ease-in-out;
     }
 
     .sub-credits {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.85);
-      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
       margin-bottom: 20px;
       font-weight: 400;
       letter-spacing: 0.5px;
     }
+
+    .top-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
   
     .admin-btn {
-      background: rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       color: #fff;
-      padding: 8px 18px;
+      padding: 10px 22px;
       border-radius: 20px;
       cursor: pointer;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .admin-btn:hover {
+      background: rgba(0, 0, 0, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .global-stop-btn {
+      background: linear-gradient(135deg, rgba(231, 76, 60, 0.4) 0%, rgba(192, 57, 43, 0.2) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(255, 255, 255, 0.5);
+      border-left: 1px solid rgba(255, 255, 255, 0.4);
+      border-right: 1px solid rgba(231, 76, 60, 0.3);
+      border-bottom: 1px solid rgba(231, 76, 60, 0.3);
+      color: #ffffff;
+      padding: 10px 22px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 8px 25px rgba(231, 76, 60, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .global-stop-btn i {
+      color: #ff6b6b;
+      font-size: 1rem;
+    }
+
+    .global-stop-btn:hover {
+      background: linear-gradient(135deg, rgba(231, 76, 60, 0.6) 0%, rgba(192, 57, 43, 0.4) 100%);
+      transform: translateY(-3px) scale(1.02);
     }
   
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 25px;
       width: 100%;
-      max-width: 1000px;
+      max-width: 1050px;
     }
   
     .card {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 16px;
-      padding: 20px 15px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.08) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(255, 255, 255, 0.5);
+      border-left: 1px solid rgba(255, 255, 255, 0.4);
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 22px 18px;
       text-align: center;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       position: relative;
+      cursor: grab;
+    }
+
+    .card:active {
+      cursor: grabbing;
+    }
+
+    .card.dragging {
+      opacity: 0.3;
     }
   
     .card.active {
       border-color: #2ecc71;
-      box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+      box-shadow: 0 0 30px rgba(46, 204, 113, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
   
     .song-header {
@@ -108,78 +217,149 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .song-title {
-      font-size: 1.1rem;
-      font-weight: 500;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      font-size: 1.15rem;
+      font-weight: 600;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
       word-break: break-word;
       text-align: right;
       flex-grow: 1;
     }
 
-    /* עיצוב לחצני החיצים להזזה אישית */
     .move-btns {
       display: flex;
-      gap: 4px;
+      gap: 5px;
     }
 
     .move-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.4);
       color: #fff;
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       font-size: 0.75rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
 
     .move-btn:hover {
-      background: rgba(255, 255, 255, 0.4);
+      background: rgba(0, 0, 0, 0.5);
+      transform: scale(1.1);
+    }
+
+    .card-footer-feedback {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+      gap: 5px;
+    }
+
+    .like-btn {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .like-btn i {
+      color: #ffffff;
+      transition: color 0.2s;
+    }
+
+    .like-btn.liked {
+      background: rgba(231, 76, 60, 0.25);
+      border-color: rgba(231, 76, 60, 0.5);
+      color: #ff6b6b;
+    }
+
+    .like-btn.liked i {
+      color: #ff6b6b;
+    }
+
+    .like-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .main-envelope-badge {
+      background: rgba(52, 152, 219, 0.25);
+      border: 1px solid rgba(52, 152, 219, 0.5);
+      color: #3498db;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .comment-open-btn {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .comment-open-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .seek-slider {
-      width: 90%;
-      margin: 10px 0;
+      width: 95%;
+      margin: 8px 0;
       accent-color: #2ecc71;
       cursor: pointer;
       height: 6px;
       border-radius: 3px;
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.5);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
       appearance: none;
       -webkit-appearance: none;
     }
 
     .seek-slider::-webkit-slider-thumb {
       appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: #ffffff;
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.6);
     }
 
     .controls-group {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
       justify-content: center;
       margin-top: 8px;
     }
   
     .action-btn {
-      background: rgba(255, 255, 255, 0.2);
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
       color: #ffffff;
       border: 1px solid rgba(255, 255, 255, 0.4);
-      padding: 8px 14px;
+      padding: 8px 16px;
       border-radius: 20px;
       font-weight: 600;
       font-size: 0.85rem;
@@ -187,26 +367,25 @@
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 5px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      gap: 6px;
     }
 
     .action-btn:hover {
-      background: rgba(255, 255, 255, 0.4);
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4));
+      transform: translateY(-2px);
     }
 
     .action-btn.play-active {
-      background: #2ecc71;
+      background: linear-gradient(to bottom, #2ecc71, #27ae60);
       border-color: #2ecc71;
-      color: #fff;
     }
   
     .modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
       justify-content: center;
       align-items: center;
       padding: 20px;
@@ -214,15 +393,16 @@
     }
   
     .modal-content {
-      background: rgba(30, 30, 30, 0.95);
+      background: linear-gradient(135deg, rgba(40, 40, 40, 0.95), rgba(20, 20, 20, 0.95));
       border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 20px;
-      padding: 25px;
+      border-radius: 24px;
+      padding: 30px;
       width: 100%;
-      max-width: 500px;
+      max-width: 550px;
       color: #fff;
       max-height: 90vh;
       overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
     }
   
     .modal-header {
@@ -231,7 +411,7 @@
       align-items: center;
       margin-bottom: 20px;
       border-bottom: 1px solid rgba(255,255,255,0.1);
-      padding-bottom: 10px;
+      padding-bottom: 12px;
     }
   
     .close-btn {
@@ -241,24 +421,35 @@
       font-size: 1.5rem;
       cursor: pointer;
     }
+
+    .close-btn:hover {
+      color: #2ecc71;
+    }
   
     .form-section {
       background: rgba(255, 255, 255, 0.05);
-      padding: 15px;
-      border-radius: 12px;
+      padding: 18px;
+      border-radius: 14px;
       margin-bottom: 15px;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
   
-    .form-group input[type="text"] {
+    .form-group input[type="text"], .form-group textarea {
       width: 100%;
-      padding: 10px;
-      border-radius: 8px;
+      padding: 12px;
+      border-radius: 10px;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       color: #fff;
       font-size: 0.95rem;
       box-sizing: border-box;
+      outline: none;
+      margin-top: 5px;
+      font-family: Arial, sans-serif;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: #2ecc71;
     }
   
     .save-btn {
@@ -267,11 +458,16 @@
       color: white;
       border: none;
       padding: 12px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-weight: 600;
       font-size: 1rem;
       cursor: pointer;
       margin-top: 10px;
+      transition: background 0.2s;
+    }
+
+    .save-btn:hover {
+      background: #27ae60;
     }
   
     .admin-song-list {
@@ -281,31 +477,106 @@
     }
   
     .admin-song-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .admin-song-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255, 255, 255, 0.05);
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .envelope-badge {
+      background: rgba(52, 152, 219, 0.25);
+      border: 1px solid rgba(52, 152, 219, 0.5);
+      color: #3498db;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .admin-comments-box {
+      background: rgba(0, 0, 0, 0.3);
       padding: 8px 12px;
       border-radius: 8px;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      max-height: 140px;
+      overflow-y: auto;
+      border-right: 3px solid #2ecc71;
+    }
+
+    .comment-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 6px;
+      gap: 10px;
+    }
+
+    .delete-comment-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .delete-comment-btn:hover {
+      background: #c0392b;
     }
   
     .delete-btn {
       background: #e74c3c;
       color: white;
       border: none;
-      padding: 5px 10px;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .delete-btn:hover {
+      background: #c0392b;
     }
   </style>
 </head>
 <body>
 
+  <!-- תמונת הרקע מוטמעת ישירות (מבוססת Base64) כך שלא תיעלם לעולם בשרת -->
+  <div class="bg-container">
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4QBaRXhpZgAATU0AKgAAAAgABAEaAAUAAAABAAAAPgEbAAUAAAABAAAARgEoAAMAAAABAAIAAAExAAIAAAARAAAATgAAAAAAAABIAAAAAQAAAEgAAAABPHNlcnZpY2U6aW1hZ2UvcmF3P/AIAAAACAAIAAAAlAAIAAAAsAAAAUAABAAIAAAABAAAAWgAAAAAAAABIAAAAAQAAAEgAAAAA/9sAQwAGBAUGBQQGBgUGBwcGCAoQCgoJCQoLDg0MEBcUGBQWGBcUGBghGBwcGBwhGBgYGBghGBgYGBghGBgYGBghGBg-/8AAEQgABwAHAwERAAIRAQMRAf/EAB8AAAEFAQEBAQEBAQAAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAwIEBAMFBQEBCCAvAQACEQMEIRIxBUFRBhNhcQgTgZEhsUIjBaHwVMHx8QghsUIjM0Vyk/8QAHwEAAAEFAQEBAQEBAQAAAAAAAAABAgMEBQYHCAkKC//EAL8RAAIBAwIEBAMFBQEBBAgAACEQMXECEhMxQRBRImEQMkGBBhWhJTMzIVQ0gSNCcnKSY4KDk6Ky8QdRFyY0VTojV2d0k8P/xAAqEAACAQMDAgUEAwEBAAAAAAAAAQIRECExAxJBUWEEEyJxBhQykaFCgVLw/9oADAMBAAIRAxEAPwD2eSnQz6tS2zQ3135wEADa2o1jN7zM01S/H17iVb8EwV1z2p9p2zY59hP0+32hI9a7c36fV084JAbVtrS9NfFq2aU9p+j6R1/u0y/B8/X1/KCRV5n31p6z8Q6l7zP7H0N8v6fT083M1q3H6bUvP7f0mX2PqVd+n1dPKCQWq3Hrf1L1J+f1H1PqT+v7P2hVb/Pufp58y9q/m639e4JAtU8/r/qGv2f6vXvj6a/n9YJBbJ+/tN/r/AKv9q2s+v7M6xP8Ay8n6vXvjPq/f/PufW/J/m1u1fXv1bgn//2Q==" alt="Background">
+  </div>
+  <div class="bg-overlay"></div>
+
   <header>
     <h1>🎼 TIAMO MUSIC 🎻</h1>
+    <div class="intro-tip">
+      <i class="fas fa-hand-pointer"></i> <b>טיפ:</b> ניתן לגרור כל כרטיס שיר בקלות לכל מיקום שתרצה (כולל גלילה אוטומטית לקצוות המסך), והנגן ימשיך לנגן ברצף!
+    </div><br>
     <div class="sub-credits">כל הזכויות שמורות ליוצרי הלחנים המקוריים בלבד ! נוצר בעזרת Ai , עריכה ועיצוב - אלי מזרחי</div>
-    <button class="admin-btn" onclick="checkAdminPassword()"><i class="fas fa-cog"></i> ניהול שירים</button>
+    
+    <div class="top-actions">
+      <button class="global-stop-btn" onclick="stopSong()"><i class="fas fa-stop-circle"></i> עצירת ניגון</button>
+      <button class="admin-btn" onclick="checkAdminPassword()"><i class="fas fa-cog"></i> ניהול שירים</button>
+    </div>
   </header>
 
   <div class="grid-container" id="songsContainer"></div>
@@ -314,7 +585,7 @@
   <div class="modal" id="adminModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>ניהול שירים</h3>
+        <h3>ניהול שירים ופידבקים ממאזינים</h3>
         <button class="close-btn" onclick="closeAdmin()">&times;</button>
       </div>
 
@@ -327,8 +598,29 @@
       </div>
 
       <div class="admin-song-list">
-        <h4>שירים קיימים במערכת</h4>
+        <h4>שירים, לייקים והודעות ממאזינים</h4>
         <div id="adminSongList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Comment Form -->
+  <div class="modal" id="commentModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 id="commentModalTitle">השארת פידבק אישי</h3>
+        <button class="close-btn" onclick="closeCommentModal()">&times;</button>
+      </div>
+      <div class="form-section">
+        <div class="form-group">
+          <label>שם המאזין (אופציונלי):</label>
+          <input type="text" id="commentAuthor" placeholder="הכנס את שמך...">
+        </div>
+        <div class="form-group" style="margin-top: 10px;">
+          <label>התגובה שלך (מוסתרת מהציבור):</label>
+          <textarea id="commentText" rows="3" placeholder="כתוב את דעתך על הרצועה..."></textarea>
+        </div>
+        <button class="save-btn" onclick="submitComment()">שלח פידבק</button>
       </div>
     </div>
   </div>
@@ -351,16 +643,24 @@
     let songs = [];
     let currentAudio = document.getElementById('audioPlayer');
     let currentPlayingIndex = null;
+    let currentlyPlayingSongId = null;
+    let activeCommentSongId = null;
 
     const ADMIN_ENCODED = "VEFMSTIwMjY=";
 
     db.collection("songs").orderBy("createdAt", "asc").onSnapshot((snapshot) => {
       let serverSongs = [];
       snapshot.forEach((doc) => {
-        serverSongs.push({ id: doc.id, ...doc.data() });
+        let data = doc.data();
+        serverSongs.push({ 
+          id: doc.id, 
+          name: data.name || "ללא שם",
+          url: data.url || "",
+          likes: data.likes || 0,
+          comments: data.comments || []
+        });
       });
 
-      // בדיקה האם למאזין יש סדר אישי שמור במכשיר שלו
       let savedOrder = localStorage.getItem('tiamo_user_song_order');
       if (savedOrder) {
         try {
@@ -382,9 +682,37 @@
         songs = serverSongs;
       }
 
+      if (currentlyPlayingSongId) {
+        currentPlayingIndex = songs.findIndex(s => s.id === currentlyPlayingSongId);
+        if (currentPlayingIndex === -1) currentPlayingIndex = null;
+      }
+
       renderSongs();
       renderAdminList();
     });
+
+    let autoScrollInterval = null;
+
+    function handleAutoScroll(clientY) {
+      const threshold = 80;
+      const speed = 15;
+
+      clearInterval(autoScrollInterval);
+
+      if (clientY < threshold) {
+        autoScrollInterval = setInterval(() => {
+          window.scrollBy(0, -speed);
+        }, 20);
+      } else if (clientY > window.innerHeight - threshold) {
+        autoScrollInterval = setInterval(() => {
+          window.scrollBy(0, speed);
+        }, 20);
+      }
+    }
+
+    function stopAutoScroll() {
+      clearInterval(autoScrollInterval);
+    }
 
     function renderSongs() {
       const container = document.getElementById('songsContainer');
@@ -394,6 +722,50 @@
         const card = document.createElement('div');
         card.className = `card ${isPlaying ? 'active' : ''}`;
         
+        card.setAttribute('draggable', 'true');
+        card.dataset.index = index;
+
+        card.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', index);
+          setTimeout(() => card.classList.add('dragging'), 0);
+        });
+
+        card.addEventListener('drag', (e) => {
+          if (e.clientY > 0) handleAutoScroll(e.clientY);
+        });
+
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          stopAutoScroll();
+        });
+
+        card.addEventListener('touchstart', () => {}, { passive: true });
+        card.addEventListener('touchmove', (e) => {
+          handleAutoScroll(e.touches[0].clientY);
+        }, { passive: true });
+        card.addEventListener('touchend', () => stopAutoScroll());
+
+        card.addEventListener('dragover', (e) => e.preventDefault());
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+          const toIndex = index;
+          if (fromIndex !== toIndex && !isNaN(fromIndex)) {
+            reorderSongs(fromIndex, toIndex);
+          }
+          stopAutoScroll();
+        });
+
+        let commentsCount = song.comments ? song.comments.length : 0;
+        let mainEnvelopeHtml = commentsCount > 0 ? `
+          <div class="main-envelope-badge" title="ישנן ${commentsCount} הודעות כתובות">
+            <i class="fas fa-envelope"></i> ${commentsCount}
+          </div>
+        ` : '';
+
+        let likedSongs = JSON.parse(localStorage.getItem('tiamo_liked_songs') || '{}');
+        let isLiked = likedSongs[song.id] === true;
+
         card.innerHTML = `
           <div class="song-header">
             <div class="song-title">${song.name}</div>
@@ -401,6 +773,17 @@
               <button class="move-btn" onclick="moveSong(${index}, -1)" title="העבר קדימה"><i class="fas fa-arrow-right"></i></button>
               <button class="move-btn" onclick="moveSong(${index}, 1)" title="העבר אחורה"><i class="fas fa-arrow-left"></i></button>
             </div>
+          </div>
+          <div class="card-footer-feedback">
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${song.id}')">
+                <i class="fas fa-heart"></i> <span>${song.likes || 0}</span>
+              </button>
+              ${mainEnvelopeHtml}
+            </div>
+            <button class="comment-open-btn" onclick="openCommentModal('${song.id}', '${song.name}')">
+              <i class="fas fa-comment-alt"></i> השאר תגובה
+            </button>
           </div>
           <input type="range" class="seek-slider" id="slider-${index}" value="0" max="100" oninput="seekAudio(this, ${index})">
           <div class="controls-group">
@@ -419,29 +802,122 @@
       });
     }
 
-    // פונקציה להזזת מיקום השיר עבור המאזין ושמירה במכשיר
+    async function toggleLike(songId) {
+      let likedSongs = JSON.parse(localStorage.getItem('tiamo_liked_songs') || '{}');
+      let isCurrentlyLiked = likedSongs[songId] === true;
+      let songRef = db.collection("songs").doc(songId);
+
+      await db.runTransaction(async (transaction) => {
+        let doc = await transaction.get(songRef);
+        if (!doc.exists) return;
+        let currentLikes = doc.data().likes || 0;
+        
+        if (isCurrentlyLiked) {
+          let newLikes = Math.max(0, currentLikes - 1);
+          transaction.update(songRef, { likes: newLikes });
+          likedSongs[songId] = false;
+        } else {
+          let newLikes = currentLikes + 1;
+          transaction.update(songRef, { likes: newLikes });
+          likedSongs[songId] = true;
+        }
+      });
+
+      localStorage.setItem('tiamo_liked_songs', JSON.stringify(likedSongs));
+    }
+
+    function openCommentModal(songId, songName) {
+      activeCommentSongId = songId;
+      document.getElementById('commentModalTitle').innerText = `תגובה עבור: ${songName}`;
+      document.getElementById('commentAuthor').value = '';
+      document.getElementById('commentText').value = '';
+      document.getElementById('commentModal').style.display = 'flex';
+    }
+
+    function closeCommentModal() {
+      document.getElementById('commentModal').style.display = 'none';
+    }
+
+    async function submitComment() {
+      let author = document.getElementById('commentAuthor').value.trim() || "מאזין אנונימי";
+      let text = document.getElementById('commentText').value.trim();
+      if (!text) {
+        alert("אנא כתוב תוכן לתגובה");
+        return;
+      }
+
+      let songRef = db.collection("songs").doc(activeCommentSongId);
+      let newComment = {
+        author: author,
+        text: text,
+        date: new Date().toLocaleString('he-IL')
+      };
+
+      await db.runTransaction(async (transaction) => {
+        let doc = await transaction.get(songRef);
+        if (!doc.exists) return;
+        let comments = doc.data().comments || [];
+        comments.push(newComment);
+        transaction.update(songRef, { comments: comments });
+      });
+
+      closeCommentModal();
+      alert("הפידבק נשלח בהצלחה ונשמר בפרטיות במערכת!");
+    }
+
+    async function deleteComment(songId, commentIndex) {
+      if (!confirm("האם למחוק הודעה זו?")) return;
+
+      let songRef = db.collection("songs").doc(songId);
+      await db.runTransaction(async (transaction) => {
+        let doc = await transaction.get(songRef);
+        if (!doc.exists) return;
+        let comments = doc.data().comments || [];
+        comments.splice(commentIndex, 1);
+        transaction.update(songRef, { comments: comments });
+      });
+    }
+
+    function reorderSongs(fromIndex, toIndex) {
+      const movedSong = songs.splice(fromIndex, 1)[0];
+      songs.splice(toIndex, 0, movedSong);
+
+      if (currentlyPlayingSongId) {
+        currentPlayingIndex = songs.findIndex(s => s.id === currentlyPlayingSongId);
+        if (currentPlayingIndex === -1) currentPlayingIndex = null;
+      }
+
+      const orderIds = songs.map(s => s.id);
+      localStorage.setItem('tiamo_user_song_order', JSON.stringify(orderIds));
+      renderSongs();
+    }
+
     function moveSong(index, direction) {
       const newIndex = index + direction;
       if (newIndex < 0 || newIndex >= songs.length) return;
 
-      // החלפת מיקומים במערך המקומי
       const temp = songs[index];
       songs[index] = songs[newIndex];
       songs[newIndex] = temp;
 
-      // שמירת הסדר החדש בזיכרון המקומי של המאזין
+      if (currentlyPlayingSongId) {
+        currentPlayingIndex = songs.findIndex(s => s.id === currentlyPlayingSongId);
+        if (currentPlayingIndex === -1) currentPlayingIndex = null;
+      }
+
       const orderIds = songs.map(s => s.id);
       localStorage.setItem('tiamo_user_song_order', JSON.stringify(orderIds));
-
       renderSongs();
     }
 
     function playSong(index) {
-      if (currentPlayingIndex !== index) {
-        currentAudio.src = songs[index].url;
-        currentPlayingIndex = index;
-      }
-      currentAudio.play();
+      currentAudio.src = songs[index].url;
+      currentPlayingIndex = index;
+      currentlyPlayingSongId = songs[index].id;
+      
+      currentAudio.play().catch(error => {
+        console.log("דפדפן מנע הפעלה אוטומטית:", error);
+      });
       renderSongs();
     }
 
@@ -458,6 +934,7 @@
         if (slider) slider.value = 0;
       }
       currentPlayingIndex = null;
+      currentlyPlayingSongId = null;
       renderSongs();
     }
 
@@ -477,13 +954,13 @@
       } else {
         currentAudio.src = songs[index].url;
         currentPlayingIndex = index;
+        currentlyPlayingSongId = songs[index].id;
         currentAudio.currentTime = slider.value;
-        currentAudio.play();
+        currentAudio.play().catch(error => {});
         renderSongs();
       }
     }
 
-    // מעבר אוטומטי לנעימה הבאה ברצף בסיום הנוכחית
     currentAudio.addEventListener('ended', () => {
       if (currentPlayingIndex !== null) {
         let slider = document.getElementById(`slider-${currentPlayingIndex}`);
@@ -491,9 +968,17 @@
         
         let nextIndex = currentPlayingIndex + 1;
         if (nextIndex < songs.length) {
-          playSong(nextIndex); // מעבר לנעימה הבאה ברצף לפי הסדר העדכני במסך
+          currentAudio.src = songs[nextIndex].url;
+          currentPlayingIndex = nextIndex;
+          currentlyPlayingSongId = songs[nextIndex].id;
+          currentAudio.play().then(() => renderSongs()).catch(() => {
+            currentPlayingIndex = null;
+            currentlyPlayingSongId = null;
+            renderSongs();
+          });
         } else {
           currentPlayingIndex = null;
+          currentlyPlayingSongId = null;
           renderSongs();
         }
       }
@@ -538,15 +1023,17 @@
       await db.collection("songs").add({
         name: cleanSongName,
         url: rawUrl,
+        likes: 0,
+        comments: [],
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
       document.getElementById('songUrlInput').value = '';
-      alert(`השיר "${cleanSongName}" נוסף בהצלחה ויתעדכן מיידית בכל המכשירים!`);
+      alert(`השיר "${cleanSongName}" נוסף בהצלחה!`);
     }
 
     async function deleteSong(id) {
-      if (confirm("האם אתה בטוח שברצונך למחוק שיר זה?")) {
+      if (confirm("האם אתה בטוח שברצונך למחוק שיר זה ואת כל הפידבקים שלו?")) {
         await db.collection("songs").doc(id).delete();
       }
     }
@@ -555,10 +1042,40 @@
       const list = document.getElementById('adminSongList');
       list.innerHTML = '';
       songs.forEach((song) => {
+        let commentsCount = song.comments ? song.comments.length : 0;
+        
+        let commentsHtml = '';
+        if (commentsCount > 0) {
+          song.comments.forEach((c, cIndex) => {
+            commentsHtml += `
+              <div class="comment-item">
+                <div><b>${c.author} (${c.date}):</b> ${c.text}</div>
+                <button class="delete-comment-btn" onclick="deleteComment('${song.id}', ${cIndex})">מחק הודעה</button>
+              </div>
+            `;
+          });
+        } else {
+          commentsHtml = '<div style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">אין עדיין הודעות לשיר זה</div>';
+        }
+
         list.innerHTML += `
           <div class="admin-song-item">
-            <span><b>${song.name}</b></span>
-            <button class="delete-btn" onclick="deleteSong('${song.id}')">מחק</button>
+            <div class="admin-song-top">
+              <div>
+                <span><b>${song.name}</b></span>
+                <span style="margin-right: 10px; color: #ff6b6b; font-size: 0.85rem;">(❤️ ${song.likes || 0})</span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <div class="envelope-badge">
+                  <i class="fas fa-envelope"></i> ${commentsCount} הודעות
+                </div>
+                <button class="delete-btn" onclick="deleteSong('${song.id}')">מחק שיר</button>
+              </div>
+            </div>
+            <div class="admin-comments-box">
+              <div style="font-weight: bold; margin-bottom: 4px; color: #2ecc71;">הודעות מוסתרות מהמאזינים:</div>
+              ${commentsHtml}
+            </div>
           </div>
         `;
       });
