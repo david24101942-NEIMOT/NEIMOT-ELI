@@ -16,8 +16,10 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100dvh;
+      right: 0;
+      width: auto;
+      height: 100vh;
+      height: 100lvh; /* גובה המסך המלא גם כשסרגל הכתובת בנייד מתכווץ – בלי פס ריק בגלילה */
       z-index: -2;
       overflow: hidden;
       background-color: #1a1a1a;
@@ -36,8 +38,10 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100dvh;
+      right: 0;
+      width: auto;
+      height: 100vh;
+      height: 100lvh; /* גובה המסך המלא גם כשסרגל הכתובת בנייד מתכווץ – בלי פס ריק בגלילה */
       z-index: -1;
       background: rgba(0, 0, 0, 0.25);
       backdrop-filter: blur(1px);
@@ -54,6 +58,11 @@
       color: #ffffff;
       background-color: #1a1a1a;
       overflow-x: hidden;
+    }
+
+    /* חשוב: ה-body חייב להיות שקוף, אחרת הצבע האפור שלו מכסה את תמונת הרקע (שנמצאת מתחתיו ב-z-index שלילי) */
+    body {
+      background-color: transparent;
     }
 
     body {
