@@ -39,7 +39,7 @@
     if (!ios && !deferred) return;
     shown = true;
     box = document.createElement('div'); box.id = 'tiamo-install'; box.setAttribute('role', 'dialog');
-    box.innerHTML = '<img src="/icons/icon-192.png" alt=""><div class="t"><b>הוסיפו את TIAMO למסך הבית</b><span></span></div>';
+    box.innerHTML = '<img src="/icons/icon-192.png" alt=""><div class="t"><b>הוסיפו את NEIMOT-ELI למסך הבית</b><span></span></div>';
     box.querySelector('span').textContent = ios ? 'לחצו על כפתור השיתוף ⬆️ בתחתית Safari, ואז "הוספה למסך הבית"' : 'כניסה מהירה לנעימות בלחיצה אחת';
     if (!ios) {
       var go = document.createElement('button'); go.className = 'go'; go.type = 'button'; go.textContent = 'הוספה';
